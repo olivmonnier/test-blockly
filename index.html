@@ -3,9 +3,14 @@
   <head>
     <meta charset="utf-8">
     <title>Blockly</title>
+    <style>
+      html, body {
+        height: 100%;
+      }
+    </style>
   </head>
   <body>
-    <div id="blocklyArea" style="height: 400px;"></div>
+    <div id="blocklyArea" style="height: 90%;"></div>
     <div id="blocklyDiv" style="position: absolute"></div>
 
     <xml id="toolbox" style="display: none">
@@ -130,16 +135,25 @@
     <script>
     var blocklyArea = document.getElementById('blocklyArea');
     var blocklyDiv = document.getElementById('blocklyDiv');
-    var workspace = Blockly.inject(blocklyDiv,
+    var workspace = Blockly.inject(
+        blocklyDiv,
         {toolbox: document.getElementById('toolbox'),
-        zoom:
-         {controls: true,
+        zoom:{
+          controls: true,
           wheel: true,
           startScale: 1.0,
           maxScale: 3,
           minScale: 0.3,
-          scaleSpeed: 1.2},
-        trashcan: true});
+          scaleSpeed: 1.2
+        },
+        grid: {
+          spacing: 20,
+          length: 3,
+          colour: '#ccc',
+          snap: true
+        },
+        trashcan: true
+      });
     var onresize = function(e) {
       // Compute the absolute coordinates and dimensions of blocklyArea.
       var element = blocklyArea;
