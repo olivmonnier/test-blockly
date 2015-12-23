@@ -15,23 +15,34 @@
       html, body {
         height: 100%;
       }
+      #textarea {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: 0;
+      }
+      .button-small {
+        font-size: 85%;
+      }
     </style>
   </head>
   <body>
     <div style="height: 5%;">
-      <button class="pure-button pure-button-primary" onClick="parseCode()">Parse Javascript</button>
-      <button class="pure-button pure-button-primary" id="stepButton" onclick="stepCode()">Step Javascript</button>
+      <button class="button-small pure-button pure-button-primary" onClick="parseCode()">Parse Javascript</button>
+      <button class="button-small pure-button pure-button-primary" id="stepButton" onclick="stepCode()">Step Javascript</button>
     </div>
     <div class="pure-g" style="height: 95%">
       <div id="blocklyArea" class="pure-u-1 pure-u-md-1-2" style="height: 100%;"></div>
-      <div id="blockCode" class="pure-u-1 pure-u-md-1-2 pure-form" style="height: 100%;">
-        <textarea id="textarea" class="pure-input-1" style="height: 100%;"></textarea>
+      <div id="blockCode" class="pure-u-1 pure-u-md-1-2 pure-form" style="height: 100%; position: relative;">
+        <div id="textarea"></div>
       </div>
     </div>
 
     <div id="blocklyDiv" style="position: absolute"></div>
     <xml id="toolbox" style="display: none">
-      <category name="Logic">
+      <category name="Logic" colour="230">
         <category name="If">
           <block type="controls_if"></block>
           <block type="controls_if">
@@ -50,7 +61,7 @@
           <block type="logic_ternary"></block>
         </category>
       </category>
-      <category name="Loops">
+      <category name="Loops" colour="120">
         <block type="controls_repeat_ext">
           <value name="TIMES">
             <block type="math_number">
@@ -80,7 +91,7 @@
         <block type="controls_forEach"></block>
         <block type="controls_flow_statements"></block>
       </category>
-      <category name="Math">
+      <category name="Math" colour="310">
         <block type="math_number"></block>
         <block type="math_arithmetic"></block>
         <block type="math_single"></block>
@@ -123,7 +134,7 @@
         </block>
         <block type="math_random_float"></block>
       </category>
-      <category name="Text">
+      <category name="Text" colour="80">
         <block type="text"></block>
         <block type="text_length"></block>
         <block type="text_print"></block>
@@ -133,7 +144,7 @@
           </value>
         </block>
       </category>
-      <category name="Lists">
+      <category name="Lists" colour="20">
         <block type="lists_create_empty"></block>
         <block type="lists_create_with"></block>
         <block type="lists_repeat">
@@ -149,8 +160,8 @@
         <block type="lists_getIndex"></block>
         <block type="lists_setIndex"></block>
       </category>
-      <category name="Variables" custom="VARIABLE"></category>
-      <category name="Functions" custom="PROCEDURE"></category>
+      <category name="Variables" custom="VARIABLE" colour="240"></category>
+      <category name="Functions" custom="PROCEDURE" colour="190"></category>
       <sep></sep>
     </xml>
 
@@ -159,6 +170,9 @@
     <script src="js/fr.js" charset="utf-8"></script>
     <script src="js/javascript_compressed.js" charset="utf-8"></script>
     <script src="js/acorn_interpreter.js" charset="utf8"></script>
+    <script src="js/ace.js" charset="utf8"></script>
+    <script src="js/mode-javascript.js" charset="utf8"></script>
+    <script src="js/worker-javascript.js" charset="utf8"></script>
 
     <script>
     var blocklyArea = document.getElementById('blocklyArea');
@@ -183,8 +197,10 @@
         trashcan: true
     });
 
-    /*Test*/
+
     var myInterpreter = null;
+    var editor = ace.edit("textarea");
+    editor.$blockScrolling = Infinity;
 
     function initApi(interpreter, scope) {
       // Add an API function for the alert() block.
@@ -251,10 +267,10 @@
         stepCode();
       }
     }
-    /*Test end */
+
     var updateCode = function() {
       var code = Blockly.JavaScript.workspaceToCode(workspace);
-      document.getElementById('textarea').value = code;
+      editor.setValue(code);
     }
     var onresize = function(e) {
       // Compute the absolute coordinates and dimensions of blocklyArea.
@@ -272,6 +288,8 @@
       blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
       blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
     };
+    var editor = ace.edit("textarea");
+    editor.session.setMode("ace/mode/javascript");
     workspace.addChangeListener(updateCode);
     window.addEventListener('resize', onresize, false);
     onresize();
