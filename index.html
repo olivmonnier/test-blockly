@@ -11,29 +11,14 @@
     <!--[if gt IE 8]><!-->
       <link rel="stylesheet" href="css/grids-responsive-min.css">
     <!--<![endif]-->
-    <style>
-      html, body {
-        height: 100%;
-      }
-      #editor {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: 0;
-      }
-      .button-small {
-        font-size: 85%;
-      }
-    </style>
+    <link rel="stylesheet" href="css/style.css" media="screen" charset="utf-8">
   </head>
-  <body>
-    <div style="height: 5%;">
+  <body style="position: relative;">
+    <div style="position: absolute; top: 0; height: 30px;">
       <button class="button-small pure-button pure-button-primary" onClick="parseCode()">Parse Javascript</button>
       <button class="button-small pure-button pure-button-primary" id="stepButton" onclick="stepCode()">Step Javascript</button>
     </div>
-    <div class="pure-g" style="height: 95%">
+    <div class="pure-g" style="position: absolute; top: 30px; right: 0; bottom: 4px; left: 0;">
       <div id="blocklyArea" class="pure-u-1 pure-u-md-1-2" style="height: 100%;"></div>
       <div id="blockCode" class="pure-u-1 pure-u-md-1-2 pure-form" style="height: 100%; position: relative;">
         <div id="editor"></div>
@@ -162,6 +147,9 @@
       </category>
       <category name="Variables" custom="VARIABLE" colour="240"></category>
       <category name="Functions" custom="PROCEDURE" colour="190"></category>
+      <category name="Utility" colour="290">
+        <block type="type_of"></block>
+      </category>
       <sep></sep>
     </xml>
 
@@ -174,125 +162,8 @@
     <script src="js/mode-javascript.js" charset="utf8"></script>
     <script src="js/worker-javascript.js" charset="utf8"></script>
 
-    <script>
-      var blocklyArea = document.getElementById('blocklyArea');
-      var blocklyDiv = document.getElementById('blocklyDiv');
-      var workspace = Blockly.inject(
-          blocklyDiv,
-          {toolbox: document.getElementById('toolbox'),
-          zoom:{
-            controls: true,
-            wheel: true,
-            startScale: 1.0,
-            maxScale: 3,
-            minScale: 0.3,
-            scaleSpeed: 1.2
-          },
-          grid: {
-            spacing: 20,
-            length: 3,
-            colour: '#ccc',
-            snap: true
-          },
-          trashcan: true
-      });
+    <script src="js/plugin.js" charset="utf-8"></script>
 
-
-      var myInterpreter = null;
-      var editor = ace.edit("editor");
-      editor.$blockScrolling = Infinity;
-
-      function initApi(interpreter, scope) {
-        // Add an API function for the alert() block.
-        var wrapper = function(text) {
-          text = text ? text.toString() : '';
-          return interpreter.createPrimitive(alert(text));
-        };
-        interpreter.setProperty(scope, 'alert',
-            interpreter.createNativeFunction(wrapper));
-
-        // Add an API function for the prompt() block.
-        var wrapper = function(text) {
-          text = text ? text.toString() : '';
-          return interpreter.createPrimitive(prompt(text));
-        };
-        interpreter.setProperty(scope, 'prompt',
-            interpreter.createNativeFunction(wrapper));
-
-        // Add an API function for highlighting blocks.
-        var wrapper = function(id) {
-          id = id ? id.toString() : '';
-          return interpreter.createPrimitive(highlightBlock(id));
-        };
-        interpreter.setProperty(scope, 'highlightBlock',
-            interpreter.createNativeFunction(wrapper));
-      }
-
-      var highlightPause = false;
-
-      function highlightBlock(id) {
-        workspace.highlightBlock(id);
-        highlightPause = true;
-      }
-
-      function parseCode() {
-        // Generate JavaScript code and parse it.
-        Blockly.JavaScript.STATEMENT_PREFIX = 'highlightBlock(%1);\n';
-        Blockly.JavaScript.addReservedWords('highlightBlock');
-        var code = Blockly.JavaScript.workspaceToCode(workspace);
-        myInterpreter = new Interpreter(code, initApi);
-
-        alert('Ready to execute this code:\n\n' + code);
-        document.getElementById('stepButton').disabled = '';
-        highlightPause = false;
-        workspace.traceOn(true);
-        workspace.highlightBlock(null);
-      }
-
-      function stepCode() {
-        try {
-          var ok = myInterpreter.step();
-        } finally {
-          if (!ok) {
-            // Program complete, no more code to execute.
-            document.getElementById('stepButton').disabled = 'disabled';
-            return;
-          }
-        }
-        if (highlightPause) {
-          // A block has been highlighted.  Pause execution here.
-          highlightPause = false;
-        } else {
-          // Keep executing until a highlight statement is reached.
-          stepCode();
-        }
-      }
-
-      var updateCode = function() {
-        var code = Blockly.JavaScript.workspaceToCode(workspace);
-        editor.setValue(code);
-      }
-      var onresize = function(e) {
-        // Compute the absolute coordinates and dimensions of blocklyArea.
-        var element = blocklyArea;
-        var x = 0;
-        var y = 0;
-        do {
-          x += element.offsetLeft;
-          y += element.offsetTop;
-          element = element.offsetParent;
-        } while (element);
-        // Position blocklyDiv over blocklyArea.
-        blocklyDiv.style.left = x + 'px';
-        blocklyDiv.style.top = y + 'px';
-        blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
-        blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
-      };
-
-      editor.session.setMode("ace/mode/javascript");
-      workspace.addChangeListener(updateCode);
-      window.addEventListener('resize', onresize, false);
-      onresize();
-    </script>
+    <script src="js/app.js" charset="utf-8"></script>
   </body>
 </html>
